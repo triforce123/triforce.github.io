@@ -21,9 +21,9 @@
 <body class="bg-gray-100 font-sans">
     <div class="max-w-4xl mx-auto px-4 py-8">
         <header class="mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to My Personal Website</h1>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Calculator Simulator</h1>
             <p class="text-xl text-gray-600 leading-relaxed">
-                Hi there! I'm Leslie Garcia, an operations analyst with a knack for numbers and a keen interest in politics. 
+                Hi there! I'm an operations analyst with a knack for numbers and a keen interest in politics. 
                 I love creating calculators that simplify complex financial concepts, making them accessible to everyone. 
                 When I'm not crunching numbers, I enjoy following political cartoons to stay informed about current events 
                 and to appreciate the power of visual commentary. This website showcases my work and interests - I hope you 
@@ -56,10 +56,30 @@
         ];
 
         const politicalCartoons = [
-            { name: "The Washington Post Editorial Cartoons", url: "https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/QGK53VS4WFBOTAOCGHIM4HAUHI.jpg&w=1200", icon: "ri-newspaper-line" },
-            { name: "Cagle Cartoons", url: "https://www.cagle.com/", icon: "ri-pencil-ruler-2-line" },
-            { name: "The Week's Political Cartoons", url: "https://theweek.com/cartoons", icon: "ri-calendar-event-line" },
-            { name: "Politico Cartoons", url: "https://www.politico.com/cartoons", icon: "ri-government-line" },
+            {
+                name: "The Washington Post Editorial Cartoons", 
+                url: "https://www.washingtonpost.com/opinions/cartoons/", 
+                icon: "ri-newspaper-line", 
+                imageUrl: "https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/QGK53VS4WFBOTAOCGHIM4HAUHI.jpg&w=1200"
+            },
+            {
+                name: "Cagle Cartoons", 
+                url: "https://www.cagle.com/", 
+                icon: "ri-pencil-ruler-2-line", 
+                imageUrl: "https://image.cagle.com/288871/830/monte-wolverton_hezbollah-israel-pointless-war-rockets-flying.png"
+            },
+            {
+                name: "The Week's Political Cartoons", 
+                url: "https://theweek.com/cartoons", 
+                icon: "ri-pencil-ruler-3-line", 
+                imageUrl: "https://cdn.mos.cms.futurecdn.net/iA2afZEG4f77aEwxv57huZ-1280-80.jpg.webp"
+            },    
+            { 
+                name: "U.S. News Cartoons", 
+                url: "https://www.usnews.com/cartoons/congress-cartoons", 
+                icon: "ri-pencil-ruler-2-line",
+                imageUrl: "https://www.usnews.com/object/image/00000192-3450-d437-a9be-367f259a0000/20240927ednac-a.jpg?update-time=1727456888479&size=responsiveGallery"
+ },
         ];
 
         const socialMedia = [
@@ -72,13 +92,24 @@
             const card = document.createElement('a');
             card.href = item.url;
             card.className = 'block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300';
-            card.innerHTML = `
-                <div class="flex items-center mb-2">
-                    <i class="${item.icon} text-2xl text-primary mr-3"></i>
-                    <h3 class="text-xl font-medium text-gray-800">${item.name}</h3>
-                </div>
-                <p class="text-gray-600">${type === 'calculator' ? 'Click to use this calculator' : 'View latest cartoons'}</p>
-            `;
+            
+            // If item has an image URL, show image
+            if (item.imageUrl) {
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <img src="${item.imageUrl}" alt="${item.name}" class="w-full h-auto rounded-lg" />
+                    </div>
+                    <p class="text-gray-600">Click to view latest cartoons on ${item.name}</p>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="${item.icon} text-2xl text-primary mr-3"></i>
+                        <h3 class="text-xl font-medium text-gray-800">${item.name}</h3>
+                    </div>
+                    <p class="text-gray-600">${type === 'calculator' ? 'Click to use this calculator' : 'View latest cartoons'}</p>
+                `;
+            }
             return card;
         }
 
