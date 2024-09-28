@@ -1,1 +1,112 @@
-"Hello World"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leslie Garcia - Personal Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Welcome to My Personal Website</h1>
+            <p class="text-xl text-gray-600 leading-relaxed">
+                Hi there! I'm Leslie Garcia, an operations analyst with a knack for numbers and a keen interest in politics. 
+                I love creating calculators that simplify complex financial concepts, making them accessible to everyone. 
+                When I'm not crunching numbers, I enjoy following political cartoons to stay informed about current events 
+                and to appreciate the power of visual commentary. This website showcases my work and interests - I hope you 
+                find it useful and engaging!
+            </p>
+        </header>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">My Calculator Collection</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="calculators"></div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Political Cartoons I Follow</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cartoons"></div>
+        </section>
+
+        <footer class="mt-12">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Connect with Me</h2>
+            <div class="flex space-x-6" id="social-media"></div>
+        </footer>
+    </div>
+
+    <script>
+        const calculators = [
+            { name: "Mortgage Calculator", url: "https://example.com/mortgage-calc", icon: "ri-home-4-line" },
+            { name: "Retirement Savings Calculator", url: "https://example.com/retirement-calc", icon: "ri-money-dollar-box-line" },
+            { name: "Tax Bracket Calculator", url: "https://example.com/tax-bracket-calc", icon: "ri-percent-line" },
+            { name: "Compound Interest Calculator", url: "https://example.com/compound-interest-calc", icon: "ri-line-chart-line" },
+        ];
+
+        const politicalCartoons = [
+            { name: "The Washington Post Editorial Cartoons", url: "https://www.washingtonpost.com/opinions/cartoons-and-animations/", icon: "ri-newspaper-line" },
+            { name: "Cagle Cartoons", url: "https://www.cagle.com/", icon: "ri-pencil-ruler-2-line" },
+            { name: "The Week's Political Cartoons", url: "https://theweek.com/cartoons", icon: "ri-calendar-event-line" },
+            { name: "Politico Cartoons", url: "https://www.politico.com/cartoons", icon: "ri-government-line" },
+        ];
+
+        const socialMedia = [
+            { name: "LinkedIn", url: "https://www.linkedin.com/in/lesliegarcia", icon: "ri-linkedin-box-fill" },
+            { name: "Twitter", url: "https://twitter.com/lesliegarcia", icon: "ri-twitter-fill" },
+            { name: "GitHub", url: "https://github.com/lesliegarcia", icon: "ri-github-fill" },
+        ];
+
+        function createCard(item, type) {
+            const card = document.createElement('a');
+            card.href = item.url;
+            card.className = 'block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300';
+            card.innerHTML = `
+                <div class="flex items-center mb-2">
+                    <i class="${item.icon} text-2xl text-primary mr-3"></i>
+                    <h3 class="text-xl font-medium text-gray-800">${item.name}</h3>
+                </div>
+                <p class="text-gray-600">${type === 'calculator' ? 'Click to use this calculator' : 'View latest cartoons'}</p>
+            `;
+            return card;
+        }
+
+        function createSocialIcon(platform) {
+            const link = document.createElement('a');
+            link.href = platform.url;
+            link.className = 'text-gray-600 hover:text-gray-800 transition-colors duration-300';
+            link.setAttribute('aria-label', platform.name);
+            link.innerHTML = `<i class="${platform.icon} text-3xl"></i>`;
+            return link;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculatorsContainer = document.getElementById('calculators');
+            calculators.forEach(calc => {
+                calculatorsContainer.appendChild(createCard(calc, 'calculator'));
+            });
+
+            const cartoonsContainer = document.getElementById('cartoons');
+            politicalCartoons.forEach(cartoon => {
+                cartoonsContainer.appendChild(createCard(cartoon, 'cartoon'));
+            });
+
+            const socialMediaContainer = document.getElementById('social-media');
+            socialMedia.forEach(platform => {
+                socialMediaContainer.appendChild(createSocialIcon(platform));
+            });
+        });
+    </script>
+</body>
+</html>
