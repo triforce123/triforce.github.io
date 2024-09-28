@@ -91,6 +91,8 @@
         function createCard(item, type) {
             const card = document.createElement('a');
             card.href = item.url;
+            card.target = "_blank"; // This ensures the link opens in a new window/tab
+            card.rel = "noopener noreferrer"; // Security measure
             card.className = 'block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300';
             
             // If item has an image URL, show image
@@ -110,8 +112,9 @@
                     <p class="text-gray-600">${type === 'calculator' ? 'Click to use this calculator' : 'View latest cartoons'}</p>
                 `;
             }
-            return card;
-        }
+    return card;
+}
+
 
         function createSocialIcon(platform) {
             const link = document.createElement('a');
