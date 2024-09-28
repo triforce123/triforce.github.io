@@ -1,1 +1,169 @@
-hello world
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Loan Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Auto Loan Calculator</h1>
+            <p class="text-gray-600">Calculate your auto loan payments and view your amortization schedule.</p>
+        </header>
+
+        <!-- Loan Calculator Form -->
+        <form id="loanCalculator" class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-gray-700 mb-2" for="autoPrice">Auto Price ($)</label>
+                    <input type="number" id="autoPrice" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter auto price" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="loanTerm">Loan Term (months)</label>
+                    <input type="number" id="loanTerm" class="w-full p-2 border border-gray-300 rounded" placeholder="e.g., 60" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="interestRate">Interest Rate (%)</label>
+                    <input type="number" id="interestRate" class="w-full p-2 border border-gray-300 rounded" placeholder="e.g., 3.5" step="0.01" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="downPayment">Down Payment ($)</label>
+                    <input type="number" id="downPayment" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter down payment" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="tradeInValue">Trade-in Value ($)</label>
+                    <input type="number" id="tradeInValue" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter trade-in value" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="amountOwed">Amount Owed on Trade-in ($)</label>
+                    <input type="number" id="amountOwed" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter amount owed" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="cashIncentives">Cash Incentives ($)</label>
+                    <input type="number" id="cashIncentives" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter any cash incentives" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="state">Your State</label>
+                    <input type="text" id="state" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter your state" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="salesTax">Sales Tax (%)</label>
+                    <input type="number" id="salesTax" class="w-full p-2 border border-gray-300 rounded" placeholder="e.g., 7.5" step="0.01" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2" for="fees">Title, Registration & Fees ($)</label>
+                    <input type="number" id="fees" class="w-full p-2 border border-gray-300 rounded" placeholder="Enter total fees" required>
+                </div>
+            </div>
+
+            <button type="button" id="calculateButton" class="bg-primary text-white p-2 rounded w-full hover:bg-primary-dark">Calculate Loan</button>
+        </form>
+
+        <!-- Loan Graph -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Loan Balance Over Time</h2>
+            <canvas id="loanChart"></canvas>
+        </div>
+
+        <!-- Amortization Schedule -->
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Amortization Schedule</h2>
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr>
+                        <th class="border p-2">Month</th>
+                        <th class="border p-2">Principal</th>
+                        <th class="border p-2">Interest</th>
+                        <th class="border p-2">Balance</th>
+                    </tr>
+                </thead>
+                <tbody id="amortizationSchedule"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculateButton').addEventListener('click', function () {
+            const autoPrice = parseFloat(document.getElementById('autoPrice').value);
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            const downPayment = parseFloat(document.getElementById('downPayment').value);
+            const tradeInValue = parseFloat(document.getElementById('tradeInValue').value);
+            const amountOwed = parseFloat(document.getElementById('amountOwed').value);
+            const cashIncentives = parseFloat(document.getElementById('cashIncentives').value);
+            const salesTax = parseFloat(document.getElementById('salesTax').value) / 100;
+            const fees = parseFloat(document.getElementById('fees').value);
+
+            const loanAmount = autoPrice - downPayment - tradeInValue + amountOwed - cashIncentives + (autoPrice * salesTax) + fees;
+            const monthlyInterestRate = interestRate / 12;
+            const monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -loanTerm));
+
+            let balance = loanAmount;
+            let totalInterest = 0;
+            const amortizationData = [];
+            const months = [];
+            const balances = [];
+            const interests = [];
+            const payments = [];
+
+            for (let i = 1; i <= loanTerm; i++) {
+                const interestPayment = balance * monthlyInterestRate;
+                const principalPayment = monthlyPayment - interestPayment;
+                balance -= principalPayment;
+                totalInterest += interestPayment;
+
+                amortizationData.push({ month: i, principal: principalPayment.toFixed(2), interest: interestPayment.toFixed(2), balance: balance.toFixed(2) });
+                months.push(i);
+                balances.push(balance.toFixed(2));
+                interests.push(interestPayment.toFixed(2));
+                payments.push(monthlyPayment.toFixed(2));
+            }
+
+            // Update Amortization Table
+            const amortizationSchedule = document.getElementById('amortizationSchedule');
+            amortizationSchedule.innerHTML = amortizationData.map(data =>
+                `<tr>
+                    <td class="border p-2">${data.month}</td>
+                    <td class="border p-2">$${data.principal}</td>
+                    <td class="border p-2">$${data.interest}</td>
+                    <td class="border p-2">$${data.balance}</td>
+                </tr>`
+            ).join('');
+
+            // Render Chart
+            const ctx = document.getElementById('loanChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Balance', data: balances, borderColor: '#3B82F6', fill: false },
+                        { label: 'Interest', data: interests, borderColor: '#F97316', fill: false },
+                        { label: 'Payment', data: payments, borderColor: '#10B981', fill: false },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true },
+                    },
+                },
+            });
+        });
+    </script>
+</body>
+</html>
