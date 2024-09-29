@@ -348,6 +348,7 @@
             let yearlyData = [];
             let currentDate = new Date(startDate);
             let cumulativePayment = 0;
+            let cumulativeInterest = 0;
 
             for (let month = 1; month <= totalMonths; month++) {
                 if (remainingBalance <= 0) break;
@@ -383,6 +384,7 @@
 
                 remainingBalance -= principalPayment;
                 cumulativePayment += principalPayment + interestPayment;
+                cumulativeInterest += interestPayment;
 
                 if (month % 12 === 0 || month === totalMonths || remainingBalance <= 0) {
                     const year = Math.ceil(month / 12);
@@ -397,6 +399,7 @@
                         date: new Date(currentDate),
                         year: year,
                         cumulativePayment: cumulativePayment,
+                        cumulativeInterest: cumulativeInterest,
                         remainingBalance: remainingBalance,
                         propertyTax: yearlyPropertyTax,
                         homeInsurance: yearlyHomeInsurance,
@@ -455,6 +458,11 @@
                         label: 'Remaining Balance',
                         data: yearlyData.map(data => ({ x: data.date, y: data.remainingBalance })),
                         borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                    }, {
+                        label: 'Cumulative Interest',
+                        data: yearlyData.map(data => ({ x: data.date, y: data.cumulativeInterest })),
+                        borderColor: 'rgba(255, 99, 132, 1)',
                         fill: false,
                     }]
                 },
