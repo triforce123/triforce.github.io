@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Loan Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <header class="mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Home Loan Calculator</h1>
+            <p class="text-xl text-gray-600">Calculate your mortgage payments with detailed annual tax and cost projections.</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Mortgage Input Section -->
+            <section class="lg:w-1/2">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Mortgage Details</h2>
+                <form id="mortgage-calculator" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" for="home-price">Home Price ($):</label>
+                        <input type="number" id="home-price" class="w-full p-3 border border-gray-300 rounded-md" placeholder="e.g., 350000" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" for="down-payment">Down Payment (%):</label>
+                        <input type="number" id="down-payment" class="w-full p-3 border border-gray-300 rounded-md" value="20" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" for="loan-term">Loan Term (years):</label>
+                        <input type="number" id="loan-term" class="w-full p-3 border border-gray-300 rounded-md" value="30" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" for="interest-rate">Interest Rate (%):</label>
+                        <input type="number" id="interest-rate" class="w-full p-3 border border-gray-300 rounded-md" placeholder="e.g., 3.5" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" for="start-date">Start Date:</label>
+                        <input type="date" id="start-date" class="w-full p-3 border border-gray-300 rounded-md" required>
+                    </div>
+                    <div class="mt-6">
+                        <button type="button" onclick="calculateMortgage()" class="w-full bg-primary text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors">Calculate Mortgage</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Graph Section -->
+            <section class="lg:w-1/2">
+                <h2 class="text-3xl font-semibold text-gray-800 mb-6">Mortgage Graph</h2>
+                <div class="bg-white p-4 rounded-lg shadow" style="height: 500px;">
+                    <canvas id="mortgageChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- Amortization Schedule Section -->
+        <section class="mt-12">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Amortization Schedule</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">Month</th>
+                            <th class="py-3 px-6 text-left">Principal Payment</th>
+                            <th class="py-3 px-6 text-left">Interest Payment</th>
+                            <th class="py-3 px-6 text-left">Total Payment</th>
+                            <th class="py-3 px-6 text-left">Remaining Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="amortizationSchedule" class="text-gray-600 text-sm font-light">
+                        <!-- Amortization rows will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function calculateMortgage() {
+            const homePrice = parseFloat(document.getElementById('home-price').value);
+            const downPaymentPercent = parseFloat(document.getElementById('down-payment').value);
+            const loanTerm = parseFloat(document.getElementById('loan-term').value);
+            const interestRate = parseFloat(document.getElementById('interest-rate').value);
+            const downPayment = (downPaymentPercent / 100) * homePrice;
+            const loanAmount = homePrice - downPayment;
+            const monthlyInterestRate = (interestRate / 100) / 12;
+            const totalMonths = loanTerm * 12;
+
+            const monthlyPayment = loanAmount * (monthlyInterestRate * Math.pow(1 + monthlyInterestRate, totalMonths)) /
+                (Math.pow(1 + monthlyInterestRate, totalMonths) - 1);
+
+            let remainingBalance = loanAmount;
+            let cumulativeInterest = 0;
+            let cumulativePrincipal = 0;
+            let schedule = [];
+            let yearlyData = [];
+
+            // Amortization Calculation
+            for (let month = 1; month <= totalMonths; month++) {
+                const interestPayment = remainingBalance * monthlyInterestRate;
+                const principalPayment = monthlyPayment - interestPayment;
+
+                cumulativeInterest += interestPayment;
+                cumulativePrincipal += principalPayment;
+
+                // Update remaining balance, ensuring it does not go below 0
+                remainingBalance -= principalPayment;
+                if (remainingBalance < 0) remainingBalance = 0;
+
+                schedule.push({
+                    month: month,
+                    principalPayment: principalPayment.toFixed(2),
+                    interestPayment: interestPayment.toFixed(2),
+                    totalPayment: monthlyPayment.toFixed(2),
+                    remainingBalance: remainingBalance.toFixed(2)
+                });
+
+                // Aggregate data by year
+                if (month % 12 === 0 || month === totalMonths) {
+                    yearlyData.push({
+                        year: Math.ceil(month / 12),
+                        cumulativePrincipal: parseFloat(cumulativePrincipal.toFixed(2)),
+                        cumulativeInterest: parseFloat(cumulativeInterest.toFixed(2)),
+                        remainingBalance: parseFloat(Math.max(remainingBalance, 0).toFixed(2))
+                    });
+                }
+            }
+
+            // Update Amortization Schedule Table
+            const amortizationTableBody = document.getElementById('amortizationSchedule');
+            amortizationTableBody.innerHTML = '';
+            schedule.forEach(row => {
+                const tableRow = `
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${row.month}</td>
+                        <td class="py-3 px-6 text-left">$${row.principalPayment}</td>
+                        <td class="py-3 px-6 text-left">$${row.interestPayment}</td>
+                        <td class="py-3 px-6 text-left">$${row.totalPayment}</td>
+                        <td class="py-3 px-6 text-left">$${row.remainingBalance}</td>
+                    </tr>`;
+                amortizationTableBody.innerHTML += tableRow;
+            });
+
+            // Prepare data for the chart
+            const labels = yearlyData.map(data => `Year ${data.year}`);
+            const principalData = yearlyData.map(data => data.cumulativePrincipal);
+            const interestData = yearlyData.map(data => data.cumulativeInterest);
+            const balanceData = yearlyData.map(data => data.remainingBalance);
+
+            // Render Graph
+            const ctx = document.getElementById('mortgageChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cumulative Principal Payment',
+                        data: principalData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false,
+                    }, {
+                        label: 'Cumulative Interest Payment',
+                        data: interestData,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                    }, {
+                        label: 'Remaining Balance',
+                        data: balanceData,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amount ($)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
